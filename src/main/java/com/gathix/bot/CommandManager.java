@@ -1,6 +1,7 @@
 package com.gathix.bot;
 
 import com.gathix.commands.moderation.ModerationCommands;
+import com.gathix.commands.stats.StatsCommands;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.events.session.ReadyEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
@@ -27,20 +28,14 @@ public class CommandManager extends ListenerAdapter {
         var commands = new ArrayList<CommandData>();
         commands.add(Commands.slash("ping", "Check if Gathix is alive"));
         commands.addAll(ModerationCommands.getCommands());
+        commands.addAll(StatsCommands.getCommands());
 
         if (!devGuildId.isEmpty()) {
             // Register to specific guild instantly — for development
-            event.getJDA().getGuildById(devGuildId)
-                    .updateCommands()
-                    .addCommands(commands)
-                    .queue(cmds -> log.info("Registered {} command(s) to dev guild",
-                            cmds.size()));
+            event.getJDA().getGuildById(devGuildId).updateCommands().addCommands(commands).queue(cmds -> log.info("Registered {} command(s) to dev guild", cmds.size()));
         } else {
             // Register globally — for production (up to 1 hour propagation)
-            event.getJDA().updateCommands()
-                    .addCommands(commands)
-                    .queue(cmds -> log.info("Registered {} command(s) globally",
-                            cmds.size()));
+            event.getJDA().updateCommands().addCommands(commands).queue(cmds -> log.info("Registered {} command(s) globally", cmds.size()));
         }
     }
 
