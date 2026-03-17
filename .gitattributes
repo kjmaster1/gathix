@@ -1,2 +1,4 @@
 /mvnw text eol=lf
+mvnw text eol=lf
+mvnw linguist-generated=true
 *.cmd text eol=crlf
