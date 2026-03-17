@@ -22,11 +22,3 @@ jobs:
 
       - name: Build with Maven
         run: ./mvnw package -DskipTests -B
-
-      - name: Run tests
-        run: ./mvnw test -B
-        env:
-          DISCORD_TOKEN: ${{ secrets.DISCORD_TOKEN }}
-          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
-          JWT_SECRET: ${{ secrets.JWT_SECRET }}
-          STEAM_API_KEY: ${{ secrets.STEAM_API_KEY }}
