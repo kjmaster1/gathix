@@ -3,6 +3,7 @@ package com.gathix.bot;
 import com.gathix.commands.lfg.LfgCommands;
 import com.gathix.commands.moderation.ModerationCommands;
 import com.gathix.commands.stats.StatsCommands;
+import com.gathix.commands.tournament.TournamentCommands;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.events.session.ReadyEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
@@ -31,6 +32,7 @@ public class CommandManager extends ListenerAdapter {
         commands.addAll(ModerationCommands.getCommands());
         commands.addAll(StatsCommands.getCommands());
         commands.addAll(LfgCommands.getCommands());
+        commands.addAll(TournamentCommands.getCommands());
 
         if (!devGuildId.isEmpty()) {
             // Register to specific guild instantly — for development
