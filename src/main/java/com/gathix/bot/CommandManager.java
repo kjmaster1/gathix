@@ -1,5 +1,6 @@
 package com.gathix.bot;
 
+import com.gathix.commands.lfg.LfgCommands;
 import com.gathix.commands.moderation.ModerationCommands;
 import com.gathix.commands.stats.StatsCommands;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
@@ -29,6 +30,7 @@ public class CommandManager extends ListenerAdapter {
         commands.add(Commands.slash("ping", "Check if Gathix is alive"));
         commands.addAll(ModerationCommands.getCommands());
         commands.addAll(StatsCommands.getCommands());
+        commands.addAll(LfgCommands.getCommands());
 
         if (!devGuildId.isEmpty()) {
             // Register to specific guild instantly — for development
