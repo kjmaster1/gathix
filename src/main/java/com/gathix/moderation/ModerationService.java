@@ -107,4 +107,9 @@ public class ModerationService {
                 .setTimestamp(LocalDateTime.now()
                         .atZone(java.time.ZoneOffset.UTC).toInstant());
     }
+
+    public void logTimeout(Long guildId, Long userId, Long moderatorId, String reason) {
+        ModAction action = new ModAction(guildId, "TIMEOUT", userId, moderatorId, reason);
+        modActionRepository.save(action);
+    }
 }

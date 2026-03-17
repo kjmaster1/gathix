@@ -55,7 +55,20 @@ public class ModerationCommands extends ListenerAdapter {
                         .addOption(OptionType.STRING, "user_id", "The user ID to unban", true)
                         .addOption(OptionType.STRING, "reason", "Reason for the unban", true)
                         .setDefaultPermissions(DefaultMemberPermissions
-                                .enabledFor(Permission.BAN_MEMBERS))
+                                .enabledFor(Permission.BAN_MEMBERS)),
+
+                Commands.slash("timeout", "Timeout a member")
+                        .addOption(OptionType.USER, "user", "The user to timeout", true)
+                        .addOption(OptionType.INTEGER, "duration", "Duration in minutes", true)
+                        .addOption(OptionType.STRING, "reason", "Reason for the timeout", true)
+                        .setDefaultPermissions(DefaultMemberPermissions
+                                .enabledFor(Permission.MODERATE_MEMBERS)),
+
+                Commands.slash("untimeout", "Remove a timeout from a member")
+                        .addOption(OptionType.USER, "user", "The user to untimeout", true)
+                        .addOption(OptionType.STRING, "reason", "Reason", true)
+                        .setDefaultPermissions(DefaultMemberPermissions
+                                .enabledFor(Permission.MODERATE_MEMBERS))
         );
     }
 
@@ -67,6 +80,8 @@ public class ModerationCommands extends ListenerAdapter {
             case "kick" -> handleKick(event);
             case "ban" -> handleBan(event);
             case "unban" -> handleUnban(event);
+            case "timeout" -> handleTimeout(event);
+            case "untimeout" -> handleUntimeout(event);
         }
     }
 
@@ -243,5 +258,90 @@ public class ModerationCommands extends ListenerAdapter {
             event.reply("Invalid user ID — must be a numeric Discord ID.")
                     .setEphemeral(true).queue();
         }
+    }
+
+    private void handleTimeout(SlashCommandInteractionEvent event) {
+        if (event.getGuild() == null) return;
+
+        Member target = event.getOption("user").getAsMember();
+        long duration = event.getOption("duration").getAsLong();
+        String reason = event.getOption("reason").getAsString();
+
+        if (target == null) {
+            event.reply("Could not find that user.").setEphemeral(true).queue();
+            return;
+        }
+
+        if (!event.getGuild().getSelfMember().canInteract(target)) {
+            event.reply("I don't have permission to timeout that user.")
+                    .setEphemeral(true).queue();
+            return;
+        }
+
+        if (duration < 1 || duration > 40320) {
+            event.reply("Duration must be between 1 and 40320 minutes (28 days).")
+                    .setEphemeral(true).queue();
+            return;
+        }
+
+        target.timeoutFor(duration, java.util.concurrent.TimeUnit.MINUTES)
+                .reason(reason)
+                .queue(
+                        success -> {
+                            moderationService.logTimeout(
+                                    event.getGuild().getIdLong(),
+                                    target.getIdLong(),
+                                    event.getUser().getIdLong(),
+                                    reason
+                            );
+                            event.replyEmbeds(
+                                    moderationService.buildModEmbed("TIMEOUT",
+                                                    target.getIdLong(),
+                                                    event.getUser().getIdLong(),
+                                                    reason, Color.ORANGE)
+                                            .addField("Duration",
+                                                    duration + " minute(s)", true)
+                                            .build()
+                            ).queue();
+                        },
+                        error -> event.reply("Failed to timeout user: "
+                                        + error.getMessage())
+                                .setEphemeral(true).queue()
+                );
+    }
+
+    private void handleUntimeout(SlashCommandInteractionEvent event) {
+        if (event.getGuild() == null) return;
+
+        Member target = event.getOption("user").getAsMember();
+        String reason = event.getOption("reason").getAsString();
+
+        if (target == null) {
+            event.reply("Could not find that user.").setEphemeral(true).queue();
+            return;
+        }
+
+        target.removeTimeout()
+                .reason(reason)
+                .queue(
+                        success -> {
+                            moderationService.logTimeout(
+                                    event.getGuild().getIdLong(),
+                                    target.getIdLong(),
+                                    event.getUser().getIdLong(),
+                                    "UNTIMEOUT: " + reason
+                            );
+                            event.replyEmbeds(
+                                    moderationService.buildModEmbed("UNTIMEOUT",
+                                                    target.getIdLong(),
+                                                    event.getUser().getIdLong(),
+                                                    reason, Color.GREEN)
+                                            .build()
+                            ).queue();
+                        },
+                        error -> event.reply("Failed to remove timeout: "
+                                        + error.getMessage())
+                                .setEphemeral(true).queue()
+                );
     }
 }
