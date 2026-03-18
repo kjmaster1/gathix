@@ -29,11 +29,11 @@ public class CommandManager extends ListenerAdapter {
     public void onReady(@NotNull ReadyEvent event) {
         var commands = new ArrayList<CommandData>();
         commands.add(Commands.slash("ping", "Check if Gathix is alive"));
+        commands.add(Commands.slash("help", "View all Gathix commands and how to use them"));
         commands.addAll(ModerationCommands.getCommands());
         commands.addAll(StatsCommands.getCommands());
         commands.addAll(LfgCommands.getCommands());
         commands.addAll(TournamentCommands.getCommands());
-        Commands.slash("help", "View all Gathix commands and how to use them");
 
         if (!devGuildId.isEmpty()) {
             // Register to specific guild instantly — for development
