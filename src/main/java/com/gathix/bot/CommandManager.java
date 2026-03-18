@@ -33,6 +33,7 @@ public class CommandManager extends ListenerAdapter {
         commands.addAll(StatsCommands.getCommands());
         commands.addAll(LfgCommands.getCommands());
         commands.addAll(TournamentCommands.getCommands());
+        Commands.slash("help", "View all Gathix commands and how to use them");
 
         if (!devGuildId.isEmpty()) {
             // Register to specific guild instantly — for development
@@ -45,8 +46,31 @@ public class CommandManager extends ListenerAdapter {
 
     @Override
     public void onSlashCommandInteraction(SlashCommandInteractionEvent event) {
-        if (event.getName().equals("ping")) {
-            event.reply("Pong! Gathix is online.").queue();
+        switch (event.getName()) {
+            case "ping" -> event.reply("Pong! Gathix is online.").queue();
+            case "help" -> handleHelp(event);
         }
+    }
+
+    private void handleHelp(SlashCommandInteractionEvent event) {
+        event.replyEmbeds(new net.dv8tion.jda.api.EmbedBuilder()
+                .setTitle("Gathix — Command Reference")
+                .setColor(new java.awt.Color(88, 101, 242))
+                .setDescription("All commands use Discord slash commands — type `/` to see them.")
+                .addField("Moderation",
+                        "`/warn` `/warnings` `/kick` `/ban` `/unban` `/timeout` `/untimeout`", false)
+                .addField("Game Stats",
+                        "`/stats steam <username>` — Look up a Steam profile", false)
+                .addField("Looking for Group",
+                        "`/lfg post` `/lfg list` `/lfg join` `/lfg close`", false)
+                .addField("Tournaments",
+                        "`/tournament list` `/tournament register` `/tournament bracket`\n" +
+                                "`/tournament-admin create` `/tournament-admin start` `/tournament-admin result`",
+                        false)
+                .addField("General",
+                        "`/ping` — Check if Gathix is online\n`/help` — Show this message", false)
+                .setFooter("Gathix — Built for gaming communities | github.com/kjmaster1/gathix")
+                .build()
+        ).setEphemeral(true).queue();
     }
 }
